@@ -350,7 +350,7 @@ class DNSEntry(object):
         self.unique = (class_ & _CLASS_UNIQUE) != 0
 
     def __eq__(self, other):
-        """Equality test on name, type, and class"""
+        """Equality test on name, type_, and class"""
         return (isinstance(other, DNSEntry) and
                 self.name == other.name and
                 self.type == other.type and

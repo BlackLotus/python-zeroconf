@@ -566,11 +566,11 @@ class ListenerTest(unittest.TestCase):
         registration_name = "%s.%s" % (name, type_)
 
         class MyListener(object):
-            def add_service(self, zeroconf, type, name):
+            def add_service(self, zeroconf, type_, name):
                 zeroconf.get_service_info(type, name)
                 service_added.set()
 
-            def remove_service(self, zeroconf, type, name):
+            def remove_service(self, zeroconf, type_, name):
                 service_removed.set()
 
         listener = MyListener()
