@@ -353,7 +353,7 @@ class DNSEntry(object):
         """Equality test on name, type_, and class"""
         return (isinstance(other, DNSEntry) and
                 self.name == other.name and
-                self.type_ == other.type and
+                self.type_ == other.type_ and
                 self.class_ == other.class_)
 
     def __ne__(self, other):
