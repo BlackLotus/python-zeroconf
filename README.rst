@@ -92,7 +92,7 @@ Here's an example of browsing for a service:
             print("Service %s removed" % (name,))
     
         def add_service(self, zeroconf, type_, name):
-            info = zeroconf.get_service_info(type, name)
+            info = zeroconf.get_service_info(type_, name)
             print("Service %s added, service info: %s" % (name, info))
     
     

@@ -345,7 +345,7 @@ class DNSEntry(object):
     def __init__(self, name, type_, class_):
         self.key = name.lower()
         self.name = name
-        self.type = type_
+        self.type_ = type_
         self.class_ = class_ & _CLASS_MASK
         self.unique = (class_ & _CLASS_UNIQUE) != 0
 
@@ -353,7 +353,7 @@ class DNSEntry(object):
         """Equality test on name, type_, and class"""
         return (isinstance(other, DNSEntry) and
                 self.name == other.name and
-                self.type == other.type and
+                self.type_ == other.type and
                 self.class_ == other.class_)
 
     def __ne__(self, other):
@@ -372,7 +372,7 @@ class DNSEntry(object):
 
     def to_string(self, hdr, other):
         """String representation with additional information"""
-        result = "%s[%s,%s" % (hdr, self.get_type(self.type),
+        result = "%s[%s,%s" % (hdr, self.get_type(self.type_),
                                self.get_class_(self.class_))
         if self.unique:
             result += "-unique,"
@@ -396,7 +396,7 @@ class DNSQuestion(DNSEntry):
     def answered_by(self, rec):
         """Returns true if the question is answered by the record"""
         return (self.class_ == rec.class_ and
-                (self.type == rec.type or self.type == _TYPE_ANY) and
+                (self.type_ == rec.type or self.type_ == _TYPE_ANY) and
                 self.name == rec.name)
 
     def __repr__(self):
@@ -1232,7 +1232,7 @@ class ServiceBrowser(threading.Thread):
             self, name='zeroconf-ServiceBrowser_' + type_)
         self.daemon = True
         self.zc = zc
-        self.type = type_
+        self.type_ = type_
         self.services = {}
         self.next_time = current_time_millis()
         self.delay = _BROWSER_TIME
@@ -1277,12 +1277,12 @@ class ServiceBrowser(threading.Thread):
             self._handlers_to_call.append(
                 lambda zeroconf: self._service_state_changed.fire(
                     zeroconf=zeroconf,
-                    service_type=self.type,
+                    service_type=self.type_,
                     name=name,
                     state_change=state_change,
                 ))
 
-        if record.type == _TYPE_PTR and record.name == self.type:
+        if record.type == _TYPE_PTR and record.name == self.type_:
             expired = record.is_expired(now)
             service_key = record.alias.lower()
             try:
@@ -1309,7 +1309,7 @@ class ServiceBrowser(threading.Thread):
         self.join()
 
     def run(self):
-        self.zc.add_listener(self, DNSQuestion(self.type, _TYPE_PTR, _CLASS_IN))
+        self.zc.add_listener(self, DNSQuestion(self.type_, _TYPE_PTR, _CLASS_IN))
 
         while True:
             now = current_time_millis()
@@ -1320,7 +1320,7 @@ class ServiceBrowser(threading.Thread):
             now = current_time_millis()
             if self.next_time <= now:
                 out = DNSOutgoing(_FLAGS_QR_QUERY)
-                out.add_question(DNSQuestion(self.type, _TYPE_PTR, _CLASS_IN))
+                out.add_question(DNSQuestion(self.type_, _TYPE_PTR, _CLASS_IN))
                 for record in self.services.values():
                     if not record.is_expired(now):
                         out.add_answer_at_time(record, now)
@@ -1354,7 +1354,7 @@ class ServiceInfo(object):
 
         if not type_.endswith(service_type_name(name)):
             raise BadTypeInNameException
-        self.type = type_
+        self.type_ = type_
         self.name = name
         self.address = address
         self.port = port
@@ -1436,8 +1436,8 @@ class ServiceInfo(object):
 
     def get_name(self):
         """Name accessor"""
-        if self.type is not None and self.name.endswith("." + self.type):
-            return self.name[:len(self.name) - len(self.type) - 1]
+        if self.type_ is not None and self.name.endswith("." + self.type_):
+            return self.name[:len(self.name) - len(self.type_) - 1]
         return self.name
 
     def update_record(self, zc, now, record):
@@ -1722,7 +1722,7 @@ class Zeroconf(QuietLogger):
 
     def get_service_info(self, type_, name, timeout=3000):
         """Returns network's service information for a particular
-        name and type, or None if no service matches by the timeout,
+        name and type_, or None if no service matches by the timeout,
         which defaults to 3 seconds."""
         info = ServiceInfo(type_, name)
         if info.request(self, timeout):
